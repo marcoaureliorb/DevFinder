@@ -1,32 +1,55 @@
+import React, { useState, useEffect } from 'react';
+import api from './services/api';
 
+import './global.css';
+import './App.css';
+import './Sidebar.css';
+import './Main.css';
 
-// Iniciar do ponto 42:20
-
-
-
-
-import React, { useState } from 'react';
-
-import Header from './Header';
+import './Components/DevItem';
+import DevItem from './Components/DevItem';
+import DevForm from './Components/DevForm';
 
 function App() {
-  const [counter, setCounter] = useState(0);
+    const [devs, setDevs] = useState([]);
 
-  function incrementCounter(){
-    setCounter(counter + 1);
-  }
-  // Nao pode ter um componente abaixo de outro sem uma tag. 
-  // nesse caso coloca a tag vazia para nao gerr
-  // divs desnecessárias.
-  return (
-    <>
-    <Header title="Meu painel" />
-    <Header title="Meu painel" />
-    <Header title="Meu painel" />
-  <h1>Contador: {counter}</h1>
-  <button onClick={incrementCounter}>Incrementar</button>
-    </>
-  );
+    useEffect(() => {
+        async function loadDevs() {
+            const response = await api.get('/devs');
+            setDevs(response.data);
+        }
+
+        loadDevs();
+    }, []);
+
+    async function handleAddDev(data) {
+        const response = await api.post('/devs', data);
+        setDevs([...devs, response.data]);
+    }
+
+    async function handleDellDev(username) {
+        const data = { "github_username": username };
+
+        const response = await api.delete('/devs', data);
+
+        console.log(response);
+    }
+
+    return (
+        <div id="app" >
+            <aside>
+                <strong>Cadastrar</strong>
+                <DevForm onSubmit={handleAddDev} />
+            </aside>
+            <main>
+                <ul>
+                    {devs.map(dev => (
+                        <DevItem key={dev._id} dev={dev} />
+                    ))}
+                </ul>
+            </main>
+        </div>
+    );
 }
 
 export default App;

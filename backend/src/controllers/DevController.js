@@ -9,48 +9,48 @@ module.exports = {
         return response.json(devs);
     },
 
-    async store (request, response)  {
-        const {github_username, techs, latitude, longitude} = request.body;
+    async store(request, response) {
+        const { github_username, techs, latitude, longitude } = request.body;
 
-        let dev = await Dev.findOne({github_username});
+        let dev = await Dev.findOne({ github_username });
 
-        if(!dev){
+        if (!dev) {
 
             const apiResponse = await axios.get(`https://api.github.com/users/${github_username}`);
-        
+
             // name = login - Caso o nome seja nula, busca por login. 
-            const {login, avatar_url, bio} = apiResponse.data;
+            const { login, avatar_url, bio } = apiResponse.data;
             const techsArryay = parseStringAsArryay(techs);
-        
+
             const location = {
                 type: 'Point',
                 coordinates: [longitude, latitude]
             }
-        
+
             dev = await Dev.create({
                 github_username,
-                name : login,
+                name: login,
                 avatar_url,
                 bio,
-                techs : techsArryay,
+                techs: techsArryay,
                 location
             });
-        
+
             console.log(login, avatar_url, bio, github_username);
         }
 
         return response.json(dev);
     },
 
-    async update(request, response){
-        const {github_username, techs, latitude, longitude} = request.body;
+    async update(request, response) {
+        const { github_username, techs, latitude, longitude } = request.body;
 
-        let dev = await Dev.findOne({github_username});
+        let dev = await Dev.findOne({ github_username });
 
-        if(dev){
-            
+        if (dev) {
+
             const apiResponse = await axios.get(`https://api.github.com/users/${github_username}`);
-            const {bio} = apiResponse.data;
+            const { bio } = apiResponse.data;
 
             const location = {
                 type: 'Point',
@@ -58,51 +58,38 @@ module.exports = {
             }
 
             const techsArryay = parseStringAsArryay(techs);
-        
-            dev = await Dev.updateOne(
-                {
-                    github_username
-                },
-                {
+
+            dev = await Dev.updateOne({
+                github_username
+            }, {
                 bio,
-                techs : techsArryay,
+                techs: techsArryay,
                 location
             });
-        }
-        else{
+        } else {
             dev = {};
         }
 
         return response.json(dev);
     },
 
-    async delete(request, response){
-        const {github_username} = request.body;
+    async delete(request, response) {
+        const { github_username } = request.body;
 
-        let dev = await Dev.findOne({github_username});
-        let msg = "";
+        let dev = await Dev.findOne({ github_username });
+        let msg = "teste";
+        console.log(dev);
 
-        if(dev){
-            
-            dev = await Dev.deleteOne(
-                {
-                    github_username
-                },
-                (err) =>{
-                    console.log(err);
-                    if(err){
-                        msg = err;
-                    }
-                    else{
-                        msg = "sucesso";
-                    }
+        if (dev) {
+            dev = await Dev.deleteOne({
+                github_username
+            },
+                (err) => {
+                    msg == undefined ? "success" : err;
                 }
             );
         }
-        else{
-            msg = "Não encontrado";
-        }
 
-        return response.json({message: msg});
+        return response.json({ message: msg });
     }
 }
